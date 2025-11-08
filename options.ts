@@ -101,9 +101,9 @@ const options = mkOptions(
         red: opt("#cc241d"),
       },
       dark: {
-        bg: opt("#282828"),
-        fg: opt("#ebdbb2"),
-        accent: opt("#ebdbb2"),
+        bg: opt("#af1a24"),
+        fg: opt("#ffd708"),
+        accent: opt("#ffd708"),
         red: opt("#cc241d"),
       },
     },
