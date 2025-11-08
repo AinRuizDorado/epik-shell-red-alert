@@ -5,20 +5,15 @@ import ScreenshotQS from "./buttons/ScreenshotQS";
 import DontDisturbQS from "./buttons/DontDisturbQS";
 import RecordQS from "./buttons/RecordQS";
 import MicQS from "./buttons/MicQS";
-import BrightnessBox from "./BrightnessBox";
 import VolumeBox from "./VolumeBox";
 import { FlowBox } from "../common/FlowBox";
 import { Gtk, App, Gdk } from "astal/gtk4";
 import { WINDOW_NAME as POWERMENU_WINDOW } from "../powermenu/PowerMenu";
 import { bind, Binding, GObject, Variable } from "astal";
 import options from "../../options";
-import AstalBattery from "gi://AstalBattery";
 import { toggleWallpaperPicker } from "../wallpaperpicker/WallpaperPicker";
-import AstalNetwork from "gi://AstalNetwork";
 import AstalBluetooth from "gi://AstalBluetooth";
-import BatteryPage from "./pages/BatteryPage";
 import SpeakerPage from "./pages/SpeakerPage";
-import WifiPage from "./pages/WifiPage";
 
 export const WINDOW_NAME = "quicksettings";
 export const qsPage = Variable("main");
@@ -55,8 +50,6 @@ function QSButtons() {
 }
 
 function Header() {
-  const battery = AstalBattery.get_default();
-
   return (
     <box hexpand={false} cssClasses={["header"]} spacing={6}>
       <label label={"Quick Setting"} hexpand xalign={0} />
@@ -67,25 +60,6 @@ function Header() {
         }}
         iconName={"preferences-desktop-wallpaper-symbolic"}
       />
-      <button
-        cssClasses={["battery"]}
-        onClicked={() => {
-          qsPage.set("battery");
-        }}
-      >
-        <box spacing={2}>
-          <image
-            iconName={bind(battery, "batteryIconName")}
-            iconSize={Gtk.IconSize.NORMAL}
-            cssClasses={["icon"]}
-          />
-          <label
-            label={bind(battery, "percentage").as(
-              (p) => `${Math.floor(p * 100)}%`,
-            )}
-          />
-        </box>
-      </button>
       <button
         cssClasses={["powermenu"]}
         onClicked={() => {
@@ -139,55 +113,21 @@ function ArrowButton<T extends GObject.Object>({
   );
 }
 
-function WifiArrowButton() {
-  const wifi = AstalNetwork.get_default().wifi;
-  const wifiSsid = Variable.derive(
-    [bind(wifi, "state"), bind(wifi, "ssid")],
-    (state, ssid) => {
-      return state == AstalNetwork.DeviceState.ACTIVATED
-        ? ssid
-        : AstalNetwork.device_state_to_string();
-    },
-  );
+function BluetoothSection() {
+  try {
+    const bluetooth = AstalBluetooth.get_default();
+    const btAdapter = bluetooth.adapter;
+    const deviceConnected = Variable.derive(
+      [bind(bluetooth, "devices"), bind(bluetooth, "isConnected")],
+      (d, _) => {
+        for (const device of d) {
+          if (device.connected) return device.name;
+        }
+        return "No device";
+      },
+    );
 
-  return (
-    <ArrowButton
-      icon={bind(wifi, "iconName")}
-      title="Wi-Fi"
-      subtitle={wifiSsid()}
-      onClicked={() => wifi.set_enabled(!wifi.get_enabled())}
-      onArrowClicked={() => {
-        wifi.scan();
-        qsPage.set("wifi");
-      }}
-      connection={[wifi, "enabled"]}
-    />
-  );
-}
-
-function WifiBluetooth() {
-  const bluetooth = AstalBluetooth.get_default();
-  const btAdapter = bluetooth.adapter;
-  const deviceConnected = Variable.derive(
-    [bind(bluetooth, "devices"), bind(bluetooth, "isConnected")],
-    (d, _) => {
-      for (const device of d) {
-        if (device.connected) return device.name;
-      }
-      return "No device";
-    },
-  );
-  const wifi = AstalNetwork.get_default().wifi;
-
-  return (
-    <box
-      homogeneous
-      spacing={6}
-      onDestroy={() => {
-        deviceConnected.drop();
-      }}
-    >
-      {!!wifi && <WifiArrowButton />}
+    return (
       <ArrowButton
         icon={bind(btAdapter, "powered").as(
           (p) => `bluetooth-${p ? "" : "disabled-"}symbolic`,
@@ -198,8 +138,11 @@ function WifiBluetooth() {
         onArrowClicked={() => console.log("Will add bt page later")}
         connection={[btAdapter, "powered"]}
       />
-    </box>
-  );
+    );
+  } catch (error) {
+    console.error("Bluetooth not available:", error);
+    return null;
+  }
 }
 
 function MainPage() {
@@ -207,9 +150,13 @@ function MainPage() {
     <box cssClasses={["qs-page"]} name={"main"} vertical spacing={6}>
       <Header />
       <Gtk.Separator />
-      <WifiBluetooth />
+      
+      {/* Bluetooth Section */}
+      <box homogeneous spacing={6}>
+        <BluetoothSection />
+      </box>
+      
       <QSButtons />
-      <BrightnessBox />
       <VolumeBox />
     </box>
   );
@@ -234,9 +181,7 @@ function QSWindow(_gdkmonitor: Gdk.Monitor) {
           transitionType={Gtk.StackTransitionType.SLIDE_LEFT_RIGHT}
         >
           <MainPage />
-          <BatteryPage />
           <SpeakerPage />
-          <WifiPage />
         </stack>
       </box>
     </PopupWindow>
