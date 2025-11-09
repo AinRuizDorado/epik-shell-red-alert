@@ -14,8 +14,11 @@ async function updateAlbumArt() {
         const artUrl = await bash`
             playerctl -p spotify metadata mpris:artUrl 2>/dev/null || echo ""
         `;
-        albumArt.set(artUrl.trim());
+        const url = artUrl.trim();
+        console.log("Album art URL:", url);
+        albumArt.set(url);
     } catch (error) {
+        console.error("Error getting album art:", error);
         albumArt.set("");
     }
 }
@@ -38,33 +41,54 @@ function Controls() {
     };
 
     return (
-        <box 
-            cssClasses={["spotify-controls"]}
-            spacing={12}
-            halign={Gtk.Align.CENTER}
-            valign={Gtk.Align.CENTER}
-            setup={(self) => {
-                // Usar la imagen del álbum como fondo si está disponible
-                const updateBackground = () => {
-                    const art = albumArt.get();
-                    if (art) {
-                        self.css = `
-                            background-image: url('${art}');
-                            background-size: cover;
-                            background-position: center;
-                        `;
-                    } else {
-                        self.css = `
-                            background-color: rgba(30, 30, 30, 0.95);
-                        `;
-                    }
-                };
-                
-                // Actualizar el fondo cuando cambie la imagen del álbum
-                albumArt.subscribe(updateBackground);
-                updateBackground();
-            }}
-        >
+        <overlay cssClasses={["spotify-controls"]}>
+            <box 
+                hexpand={true}
+                vexpand={true}
+                spacing={12}
+                halign={Gtk.Align.CENTER}
+                valign={Gtk.Align.CENTER}
+                setup={(self) => {
+                    let cssProvider: Gtk.CssProvider | null = null;
+                    
+                    const updateBackground = () => {
+                        const art = albumArt.get();
+                        const styleContext = self.get_style_context();
+                        
+                        // Remover el proveedor CSS anterior si existe
+                        if (cssProvider) {
+                            styleContext.remove_provider(cssProvider);
+                            cssProvider = null;
+                        }
+                        
+                        if (art && art.trim() !== "") {
+                            // Crear un nuevo proveedor CSS con la imagen actual
+                            cssProvider = new Gtk.CssProvider();
+                            const css = `
+                                * {
+                                    background-image: url('${art}');
+                                    background-size: cover;
+                                    background-position: center;
+                                    background-repeat: no-repeat;
+                                }
+                            `;
+                            cssProvider.load_from_data(css);
+                            styleContext.add_provider(cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+                        } else {
+                            self.style = "background-color: rgba(30, 30, 30, 0.95);";
+                        }
+                    };
+                    
+                    albumArt.subscribe(updateBackground);
+                    updateBackground();
+                }}
+            />
+            <box 
+                spacing={12}
+                halign={Gtk.Align.CENTER}
+                valign={Gtk.Align.CENTER}
+                cssClasses={["controls-overlay"]}
+            >
             <button 
                 cssClasses={["control-button"]}
                 onClicked={previous}
@@ -83,7 +107,8 @@ function Controls() {
             >
                 <image iconName={"media-skip-forward-symbolic"} />
             </button>
-        </box>
+            </box>
+        </overlay>
     );
 }
 

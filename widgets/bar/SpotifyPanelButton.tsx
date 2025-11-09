@@ -25,7 +25,9 @@ async function updateSpotifyInfo() {
         const artUrl = await bash`
             playerctl -p spotify metadata mpris:artUrl 2>/dev/null || echo ""
         `;
-        albumArt.set(artUrl.trim());
+        const url = artUrl.trim();
+        console.log("Album art URL from panel:", url);
+        albumArt.set(url);
     } catch (error) {
         spotifyInfo.set({ artist: "", title: "" });
         albumArt.set("");

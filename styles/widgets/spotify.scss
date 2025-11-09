@@ -24,6 +24,18 @@ window#spotify-controls {
         border: 1px solid rgba(255, 255, 255, 0.1);
         min-width: 300px;
         
+        // Asegurar que el box de fondo ocupe todo el espacio
+        > box {
+            min-height: 120px;
+            border-radius: 12px;
+        }
+        
+        .controls-overlay {
+            // Añadir un fondo oscuro semi-transparente sobre la imagen
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+            border-radius: 12px;
+        }
+        
         .control-button {
             background: rgba(29, 185, 84, 0.9);
             border: none;
