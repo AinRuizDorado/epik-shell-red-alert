@@ -1,8 +1,10 @@
 import { Variable } from "astal";
+import { App } from "astal/gtk4";
 import PanelButton from "../common/PanelButton";
 import { bash } from "../../utils";
 
 const spotifyInfo = Variable({ artist: "", title: "" });
+const albumArt = Variable("");
 
 // Función para obtener la información de Spotify
 async function updateSpotifyInfo() {
@@ -18,26 +20,35 @@ async function updateSpotifyInfo() {
         } else {
             spotifyInfo.set({ artist: "", title: "" });
         }
+        
+        // Actualizar también la imagen del álbum
+        const artUrl = await bash`
+            playerctl -p spotify metadata mpris:artUrl 2>/dev/null || echo ""
+        `;
+        albumArt.set(artUrl.trim());
     } catch (error) {
         spotifyInfo.set({ artist: "", title: "" });
+        albumArt.set("");
     }
 }
 
 // Actualizar la información periódicamente
-setInterval(updateSpotifyInfo, 1000);
-// También actualizar cuando cambie el estado de reproducción
-bash`
-    playerctl -p spotify -F status 2>/dev/null | while read; do
-        echo "update"
-    done
-`.then(() => {
-    // Esto mantendrá la información actualizada cuando cambie el estado
-});
+setInterval(() => {
+    updateSpotifyInfo().catch(() => {});
+}, 1000);
+// Llamada inicial
+updateSpotifyInfo().catch(() => {});
+
+const WINDOW_NAME = "spotify-controls";
 
 export default function SpotifyPanelButton() {
     return (
-        <PanelButton>
-            <box spacing={6}>
+        <PanelButton
+            window={WINDOW_NAME}
+            onClicked={() => App.toggle_window(WINDOW_NAME)}
+        >
+            <box spacing={6} cssClasses={["spotify-widget"]}>
+                <image iconName={"spotify"} pixelSize={16} />
                 <label 
                     label={spotifyInfo((info) => 
                         info.artist && info.title ? `${info.artist} - ${info.title}` : ""

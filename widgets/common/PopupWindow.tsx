@@ -121,6 +121,8 @@ type PopupWindowProps = WindowProps & {
   visible?: boolean;
   animation?: string;
   layout?: string;
+  width?: number;
+  height?: number;
 };
 
 export default function PopupWindow({
@@ -128,6 +130,8 @@ export default function PopupWindow({
   name,
   visible,
   layout = "center",
+  width,
+  height,
   ...props
 }: PopupWindowProps) {
   const { TOP, RIGHT, BOTTOM, LEFT } = Astal.WindowAnchor;
@@ -141,6 +145,8 @@ export default function PopupWindow({
       keymode={Astal.Keymode.EXCLUSIVE}
       application={App}
       anchor={TOP | BOTTOM | RIGHT | LEFT}
+      defaultWidth={width}
+      defaultHeight={height}
       onKeyPressed={(_, keyval) => {
         if (keyval === Gdk.KEY_Escape) {
           App.toggle_window(name);
