@@ -67,6 +67,8 @@ function Controls() {
                                     background-size: cover;
                                     background-position: center;
                                     background-repeat: no-repeat;
+                                    min-width: 800px;
+                                    min-height: 800px;
                                 }
                             `;
                             cssProvider.load_from_data(css);
@@ -95,20 +97,26 @@ function Controls() {
                 <button 
                     cssClasses={["control-button"]}
                     onClicked={previous}
+                    widthRequest={30}
+                    heightRequest={30}
                 >
-                    <image iconName={"media-skip-backward-symbolic"} />
+                    <image iconName={"media-skip-backward-symbolic"} pixelSize={16} />
                 </button>
                 <button 
                     cssClasses={["control-button"]}
                     onClicked={playPause}
+                    widthRequest={30}
+                    heightRequest={30}
                 >
-                    <image iconName={"media-playback-start-symbolic"} />
+                    <image iconName={"media-playback-start-symbolic"} pixelSize={16} />
                 </button>
                 <button 
                     cssClasses={["control-button"]}
                     onClicked={next}
+                    widthRequest={30}
+                    heightRequest={30}
                 >
-                    <image iconName={"media-skip-forward-symbolic"} />
+                    <image iconName={"media-skip-forward-symbolic"} pixelSize={16} />
                 </button>
             </box>
         </overlay>
@@ -116,20 +124,16 @@ function Controls() {
 }
 
 export default function SpotifyControls(monitorIndex: number = 0) {
-    // Obtener el ancho de la pantalla y calcular el 40% para hacerlo más ancho
-    const monitor = App.get_monitors()[monitorIndex];
-    const width = monitor ? Math.floor(monitor.width * 0.4) : 400;
-    
     return (
         <PopupWindow
             name={WINDOW_NAME}
             layout="top"
             child={<Controls />}
-            width={width}
-            height={120}
+            width={800}
+            height={800}
             setup={(self) => {
                 // Asegurarnos de que la ventana tenga las propiedades necesarias para mostrar el fondo
-                self.set_default_size(width, 120);
+                self.set_default_size(800, 800);
             }}
         />
     );
