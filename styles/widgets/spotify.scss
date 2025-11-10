@@ -24,10 +24,10 @@ window#spotify-controls {
         border: 1px solid rgba(255, 255, 255, 0.1);
         min-width: 300px;
         
-        // Asegurar que el box de fondo ocupe todo el espacio
-        > box {
-            min-height: 120px;
-            border-radius: 12px;
+        // Usar la clase CSS para seleccionar el box que contiene la imagen
+        .album-art-background {
+            min-width: 800px;
+            min-height: 800px;
         }
         
         .controls-overlay {

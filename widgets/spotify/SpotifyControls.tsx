@@ -47,7 +47,7 @@ function Controls() {
             <Picture
                 hexpand={true}
                 vexpand={true}
-                contentFit={Gtk.ContentFit.COVER}
+                cssClasses={["album-art-background"]}
                 setup={(self) => {
                     // Actualizar la imagen cuando cambie la URL
                     albumArt.subscribe((url) => {
