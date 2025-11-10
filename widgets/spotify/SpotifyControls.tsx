@@ -2,6 +2,7 @@ import { App, Astal, Gtk } from "astal/gtk4";
 import PopupWindow from "../common/PopupWindow";
 import { bash } from "../../utils";
 import { Variable } from "astal";
+import Picture from "../common/Picture";
 
 const WINDOW_NAME = "spotify-controls";
 
@@ -42,50 +43,21 @@ function Controls() {
 
     return (
         <overlay cssClasses={["spotify-controls"]}>
-            <box 
+            {/* Usar Picture para mostrar la imagen del álbum */}
+            <Picture
                 hexpand={true}
                 vexpand={true}
+                contentFit={Gtk.ContentFit.COVER}
                 setup={(self) => {
-                    let cssProvider: Gtk.CssProvider | null = null;
-                    
-                    const updateBackground = () => {
-                        const art = albumArt.get();
-                        const styleContext = self.get_style_context();
-                        
-                        // Remover el proveedor CSS anterior si existe
-                        if (cssProvider) {
-                            styleContext.remove_provider(cssProvider);
-                            cssProvider = null;
-                        }
-                        
-                        if (art && art.trim() !== "") {
-                            // Crear un nuevo proveedor CSS con la imagen actual
-                            cssProvider = new Gtk.CssProvider();
-                            const css = `
-                                .spotify-controls {
-                                    background-image: url('${art}');
-                                    background-size: cover;
-                                    background-position: center;
-                                    background-repeat: no-repeat;
-                                    min-width: 800px;
-                                    min-height: 800px;
-                                }
-                            `;
-                            cssProvider.load_from_data(css);
-                            styleContext.add_provider(cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+                    // Actualizar la imagen cuando cambie la URL
+                    albumArt.subscribe((url) => {
+                        if (url && url.trim() !== "") {
+                            self.set_filename(url);
                         } else {
-                            // Si no hay imagen, usar un color de fondo
-                            if (cssProvider) {
-                                styleContext.remove_provider(cssProvider);
-                                cssProvider = null;
-                            }
-                            // Aplicar estilo directamente al widget
-                            self.set_css_classes(["spotify-controls", "fallback-bg"]);
+                            // Si no hay imagen, limpiar
+                            self.set_filename(null);
                         }
-                    };
-                    
-                    albumArt.subscribe(updateBackground);
-                    updateBackground();
+                    });
                 }}
             />
             <box 
