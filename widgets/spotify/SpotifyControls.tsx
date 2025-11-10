@@ -45,9 +45,6 @@ function Controls() {
             <box 
                 hexpand={true}
                 vexpand={true}
-                spacing={12}
-                halign={Gtk.Align.CENTER}
-                valign={Gtk.Align.CENTER}
                 setup={(self) => {
                     let cssProvider: Gtk.CssProvider | null = null;
                     
@@ -65,7 +62,7 @@ function Controls() {
                             // Crear un nuevo proveedor CSS con la imagen actual
                             cssProvider = new Gtk.CssProvider();
                             const css = `
-                                * {
+                                .spotify-controls {
                                     background-image: url('${art}');
                                     background-size: cover;
                                     background-position: center;
@@ -75,7 +72,13 @@ function Controls() {
                             cssProvider.load_from_data(css);
                             styleContext.add_provider(cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
                         } else {
-                            self.style = "background-color: rgba(30, 30, 30, 0.95);";
+                            // Si no hay imagen, usar un color de fondo
+                            if (cssProvider) {
+                                styleContext.remove_provider(cssProvider);
+                                cssProvider = null;
+                            }
+                            // Aplicar estilo directamente al widget
+                            self.set_css_classes(["spotify-controls", "fallback-bg"]);
                         }
                     };
                     
@@ -89,24 +92,24 @@ function Controls() {
                 valign={Gtk.Align.CENTER}
                 cssClasses={["controls-overlay"]}
             >
-            <button 
-                cssClasses={["control-button"]}
-                onClicked={previous}
-            >
-                <image iconName={"media-skip-backward-symbolic"} />
-            </button>
-            <button 
-                cssClasses={["control-button"]}
-                onClicked={playPause}
-            >
-                <image iconName={"media-playback-start-symbolic"} />
-            </button>
-            <button 
-                cssClasses={["control-button"]}
-                onClicked={next}
-            >
-                <image iconName={"media-skip-forward-symbolic"} />
-            </button>
+                <button 
+                    cssClasses={["control-button"]}
+                    onClicked={previous}
+                >
+                    <image iconName={"media-skip-backward-symbolic"} />
+                </button>
+                <button 
+                    cssClasses={["control-button"]}
+                    onClicked={playPause}
+                >
+                    <image iconName={"media-playback-start-symbolic"} />
+                </button>
+                <button 
+                    cssClasses={["control-button"]}
+                    onClicked={next}
+                >
+                    <image iconName={"media-skip-forward-symbolic"} />
+                </button>
             </box>
         </overlay>
     );
@@ -124,6 +127,10 @@ export default function SpotifyControls(monitorIndex: number = 0) {
             child={<Controls />}
             width={width}
             height={120}
+            setup={(self) => {
+                // Asegurarnos de que la ventana tenga las propiedades necesarias para mostrar el fondo
+                self.set_default_size(width, 120);
+            }}
         />
     );
 }
