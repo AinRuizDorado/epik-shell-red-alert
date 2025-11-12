@@ -12,6 +12,7 @@ import { idle } from "astal";
 import { windowAnimation } from "../../utils/hyprland";
 import { WindowProps } from "astal/gtk4/widget";
 import TrayPanelButton from "./TrayPanelButton";
+import WeatherPanelButton from "./WeatherPanelButton";
 
 const { bar } = options;
 const { start, center, end } = bar;
@@ -23,6 +24,7 @@ const panelButton = {
   launcher: () => <LauncherPanelButton />,
   workspace: () => <WorkspacesPanelButton />,
   time: () => <TimePanelButton />,
+  weather: () => <WeatherPanelButton />,
   notification: () => <NotifPanelButton />,
   network_speed: () => <NetworkSpeedPanelButton />,
   quicksetting: () => <QSPanelButton />,

@@ -97,6 +97,8 @@ export async function bash(strings: string | string[], ...values: unknown[]) {
   });
 }
 
+export { execAsync };
+
 export const gsettings = new Gio.Settings({
   schema: "org.gnome.desktop.interface",
 });
