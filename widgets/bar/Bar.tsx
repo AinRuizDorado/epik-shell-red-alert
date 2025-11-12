@@ -16,6 +16,9 @@ import TrayPanelButton from "./TrayPanelButton";
 const { bar } = options;
 const { start, center, end } = bar;
 
+// Remove 'notification' from the end array to prevent duplication
+// We'll handle it separately in the End function
+
 const panelButton = {
   launcher: () => <LauncherPanelButton />,
   workspace: () => <WorkspacesPanelButton />,
@@ -57,10 +60,14 @@ function End() {
     <box halign={Gtk.Align.END}>
       {end((e) =>
         separatorBetween(
-          e.map((w) => panelButton[w]()),
+          e
+            .filter(w => w !== 'notification') // Excluir 'notification' de la lista
+            .map((w) => panelButton[w]()),
           Gtk.Orientation.VERTICAL,
         ),
       )}
+      <Gtk.Separator orientation={Gtk.Orientation.VERTICAL} />
+      <NotifPanelButton />
     </box>
   );
 }

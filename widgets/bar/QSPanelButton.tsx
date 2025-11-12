@@ -7,6 +7,7 @@ import { bind, Variable } from "astal";
 import AstalPowerProfiles from "gi://AstalPowerProfiles";
 import AstalNetwork from "gi://AstalNetwork";
 import AstalBluetooth from "gi://AstalBluetooth";
+import { Gtk } from "astal/gtk4";
 
 function NetworkIcon() {
   const network = AstalNetwork.get_default();
@@ -49,6 +50,7 @@ export default function QSPanelButton() {
     >
       <box spacing={6}>
         <NetworkIcon />
+        <Gtk.Separator orientation={Gtk.Orientation.VERTICAL} />
         <image
           visible={bind(bluetooth, "isPowered")}
           iconName={"bluetooth-symbolic"}

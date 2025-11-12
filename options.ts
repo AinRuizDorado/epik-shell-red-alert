@@ -22,7 +22,7 @@ const options = mkOptions(
       position: opt("top"),
       separator: opt(true),
       start: opt(["launcher", "workspace"]),
-      center: opt(["time", "notification"]),
+      center: opt(["time"]),
       end: opt(["network_speed", "quicksetting"]),
     },
     desktop_clock: {
